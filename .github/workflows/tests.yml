@@ -33,7 +33,7 @@ jobs:
 
   delphi:
     name: Delphi tests
-    if: ${{ (vars.ENABLE_DELPHI_CI || 'false') == 'true' }}
+    if: ${{ vars.ENABLE_DELPHI_CI == 'true' }}
     runs-on: [self-hosted, windows, delphi]
     steps:
       - name: Checkout
