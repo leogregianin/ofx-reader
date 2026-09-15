@@ -33,7 +33,7 @@ jobs:
 
   delphi:
     name: Delphi tests
-    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && vars.ENABLE_DELPHI_CI == 'true') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || (vars.ENABLE_DELPHI_CI == 'true' && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false))) }}
     runs-on: [self-hosted, windows, delphi]
     steps:
       - name: Checkout
