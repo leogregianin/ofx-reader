@@ -1,0 +1,54 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lazarus-fpc:
+    name: Lazarus/FPC tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Free Pascal
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fp-compiler fp-units-fcl
+
+      - name: Compile tests
+        working-directory: tests/Lazarus
+        run: fpc fpcunitproject1.lpr
+
+      - name: Run tests
+        working-directory: tests/Lazarus
+        run: ./fpcunitproject1 --all --format=plain
+
+  delphi:
+    name: Delphi tests
+    if: ${{ github.event_name == 'workflow_dispatch' || (vars.ENABLE_DELPHI_CI == 'true' && (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false))) }}
+    runs-on: [self-hosted, windows, delphi]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Delphi test runner
+        shell: cmd
+        run: |
+          if not defined RSVARSDIR (
+            echo RSVARSDIR is not configured on this runner.
+            exit /b 1
+          )
+          call "%RSVARSDIR%\rsvars.bat"
+          dcc32 -B tests\Delphi\ofxreadertest.dpr
+
+      - name: Run Delphi tests
+        shell: cmd
+        run: tests\Delphi\ofxreadertest.exe
